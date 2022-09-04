@@ -37,6 +37,7 @@ class ZipWorldBackupAsyncTask extends AsyncTask
             $this->zipSub($zip, $this->worldPath);
             if (!@$zip->close()) {
                 $this->setResult(-1);
+                var_dump($zip->getStatusString());
             }
             else {
                 $this->setResult(0);
