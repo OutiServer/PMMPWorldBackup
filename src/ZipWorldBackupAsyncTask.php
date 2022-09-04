@@ -36,24 +36,30 @@ class ZipWorldBackupAsyncTask extends AsyncTask
         if ($zip->open("{$this->backupFolder}backups/" . date("Y-m-d-H-i-s") . ".worldbackup.zip", ZipArchive::CREATE) === true) {
             $this->zipSub($zip, $this->worldPath);
             if (!@$zip->close()) {
-                $this->setResult(false);
+                $this->setResult(-1);
             }
             else {
-                $this->setResult(true);
+                $this->setResult(0);
             }
         }
         else {
-            $this->setResult(false);
+            $this->setResult(-2);
         }
     }
 
     public function onCompletion(): void
     {
-        if ($this->getResult()) {
+        if ($this->getResult() === 0) {
             WorldBackup::getInstance()->getLogger()->info("ワールドバックアップを作成しました");
         }
+        elseif ($this->getResult() === -1) {
+            WorldBackup::getInstance()->getLogger()->error("ワールドバックアップの作成に失敗しました、ワールドデータが書き込み中ではありませんか？");
+        }
+        elseif ($this->getResult() === -2) {
+            WorldBackup::getInstance()->getLogger()->error("ワールドバックアップの作成に失敗しました、backupフォルダに書き込み権限があることを確認してください");
+        }
         else {
-            WorldBackup::getInstance()->getLogger()->error("ワールドバックアップの作成に失敗しました");
+            WorldBackup::getInstance()->getLogger()->error("ワールドバックアップの作成に失敗しました、不明なエラー");
         }
     }
 
