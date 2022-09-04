@@ -31,7 +31,7 @@ class WorldBackup extends PluginBase
 
         $this->getScheduler()->scheduleRepeatingTask(new ClosureTask(
             function (): void {
-                $this->getServer()->getAsyncPool()->submitTask(new ZipWorldBackupAsyncTask($this->getDataFolder(), "{$this->getServer()->getDataPath()}worlds/"));
+                $this->getServer()->getAsyncPool()->submitTask(new WorldBackupAsyncTask($this->getDataFolder(), "{$this->getServer()->getDataPath()}worlds/"));
             }),
             $this->getConfig()->get("interval", 60) * 60 * 20);
 

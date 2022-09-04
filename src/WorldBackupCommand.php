@@ -26,7 +26,7 @@ class WorldBackupCommand extends Command implements PluginOwned
 
     public function execute(CommandSender $sender, string $commandLabel, array $args)
     {
-        Server::getInstance()->getAsyncPool()->submitTask(new ZipWorldBackupAsyncTask(WorldBackup::getInstance()->getDataFolder(), Server::getInstance()->getDataPath() . "worlds/"));
+        Server::getInstance()->getAsyncPool()->submitTask(new WorldBackupAsyncTask(WorldBackup::getInstance()->getDataFolder(), Server::getInstance()->getDataPath() . "worlds/"));
     }
 
     public function getOwningPlugin(): Plugin
