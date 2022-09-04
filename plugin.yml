@@ -1,0 +1,11 @@
+name: WorldBackup
+description: ワールドバックアップ
+version: 1.0.0
+api: 4.0.0
+main: outiserver\worldbackup\WorldBackup
+src-namespace-prefix: outiserver\worldbackup
+
+permissions:
+  worldbackup.command:
+    description: WorldBackup Command Permission
+    default: op
