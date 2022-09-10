@@ -65,7 +65,7 @@ class WorldBackupAsyncTask extends AsyncTask
                     if (is_dir($dir.$file)) {
                         $this->copy($dir.$file, $new_dir.$file);
                     } else {
-                        copy($dir.$file, $new_dir.$file);
+                        @copy($dir.$file, $new_dir.$file);
                     }
                 }
                 closedir($handle);
