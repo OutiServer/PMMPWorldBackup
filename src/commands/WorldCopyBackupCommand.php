@@ -1,18 +1,18 @@
 <?php
 
-declare(strict_types=1);
+namespace outiserver\worldbackup\commands;
 
-namespace outiserver\worldbackup;
-
+use outiserver\worldbackup\tasks\WorldCopyBackupAsyncTask;
+use outiserver\worldbackup\tasks\WorldZipBackupAsyncTask;
+use outiserver\worldbackup\WorldBackup;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\lang\Translatable;
 use pocketmine\plugin\Plugin;
 use pocketmine\plugin\PluginOwned;
 use pocketmine\Server;
-use pocketmine\world\World;
 
-class WorldBackupCommand extends Command implements PluginOwned
+class WorldCopyBackupCommand extends Command implements PluginOwned
 {
     private Plugin $plugin;
 
@@ -26,7 +26,7 @@ class WorldBackupCommand extends Command implements PluginOwned
 
     public function execute(CommandSender $sender, string $commandLabel, array $args)
     {
-        Server::getInstance()->getAsyncPool()->submitTask(new WorldBackupAsyncTask(WorldBackup::getInstance()->getDataFolder(), Server::getInstance()->getDataPath() . "worlds/"));
+        Server::getInstance()->getAsyncPool()->submitTask(new WorldCopyBackupAsyncTask(WorldBackup::getInstance()->getDataFolder(), Server::getInstance()->getDataPath() . "worlds/"));
     }
 
     public function getOwningPlugin(): Plugin

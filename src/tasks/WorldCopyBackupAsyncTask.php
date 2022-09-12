@@ -2,19 +2,20 @@
 
 declare(strict_types=1);
 
-namespace outiserver\worldbackup;
+namespace outiserver\worldbackup\tasks;
 
+use outiserver\worldbackup\WorldBackup;
 use pocketmine\scheduler\AsyncTask;
-use ZipArchive;
 
-class WorldBackupAsyncTask extends AsyncTask
+class WorldCopyBackupAsyncTask extends AsyncTask
 {
+
     /**
      * バックアップ先のフォルダ
      *
      * @var string
      */
-    private string $backupFolder;
+    private string $backupFolderPath;
 
     /**
      * Worldのフォルダ
@@ -26,7 +27,7 @@ class WorldBackupAsyncTask extends AsyncTask
 
     public function __construct(string $backupFolder, string $worldPath)
     {
-        $this->backupFolder = $backupFolder;
+        $this->backupFolderPath = $backupFolder;
         $this->worldPath = $worldPath;
         $this->backupPath = "";
 
@@ -35,7 +36,7 @@ class WorldBackupAsyncTask extends AsyncTask
 
     public function onRun(): void
     {
-        $this->backupPath = "{$this->backupFolder}backups/" . date("Y-m-d-H-i-s");
+        $this->backupPath = "{$this->backupFolderPath}backups/" . date("Y-m-d-H-i-s");
         mkdir($this->backupPath);
         $this->copy($this->worldPath, $this->backupPath);
     }
@@ -48,8 +49,8 @@ class WorldBackupAsyncTask extends AsyncTask
 
     private function copy($dir, $new_dir)
     {
-        $dir     = rtrim($dir, '/').'/';
-        $new_dir = rtrim($new_dir, '/').'/';
+        $dir = rtrim($dir, '/') . '/';
+        $new_dir = rtrim($new_dir, '/') . '/';
 
         if (is_dir($dir)) {
             if (!is_dir($new_dir)) {
@@ -62,10 +63,10 @@ class WorldBackupAsyncTask extends AsyncTask
                     if ($file === '.' || $file === '..') {
                         continue;
                     }
-                    if (is_dir($dir.$file)) {
-                        $this->copy($dir.$file, $new_dir.$file);
+                    if (is_dir($dir . $file)) {
+                        $this->copy($dir . $file, $new_dir . $file);
                     } else {
-                        copy($dir.$file, $new_dir.$file);
+                        copy($dir . $file, $new_dir . $file);
                     }
                 }
                 closedir($handle);
