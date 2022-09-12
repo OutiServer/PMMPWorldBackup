@@ -59,33 +59,6 @@ class WorldZipBackupAsyncTask extends AsyncTask
         }
     }
 
-    private function copy($dir, $new_dir)
-    {
-        $dir = rtrim($dir, '/') . '/';
-        $new_dir = rtrim($new_dir, '/') . '/';
-
-        if (is_dir($dir)) {
-            if (!is_dir($new_dir)) {
-                mkdir($new_dir);
-                chmod($new_dir, 0777);
-            }
-
-            if ($handle = opendir($dir)) {
-                while (false !== ($file = readdir($handle))) {
-                    if ($file === '.' || $file === '..') {
-                        continue;
-                    }
-                    if (is_dir($dir . $file)) {
-                        $this->copy($dir . $file, $new_dir . $file);
-                    } else {
-                        copy($dir . $file, $new_dir . $file);
-                    }
-                }
-                closedir($handle);
-            }
-        }
-    }
-
     private function zipSub(ZipArchive $zip, string $path, string $parentPath = '')
     {
         $dir = opendir($path);
