@@ -68,4 +68,12 @@ class WorldBackup extends PluginBase
     {
         return $this->config;
     }
+
+    /**
+     * @return LanguageManager
+     */
+    public function getLanguageManager(): LanguageManager
+    {
+        return $this->languageManager;
+    }
 }
