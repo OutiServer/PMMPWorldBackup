@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace outiserver\worldbackup\tasks;
 
+use outiserver\worldbackup\language\LanguageManager;
 use outiserver\worldbackup\WorldBackup;
 use pocketmine\scheduler\AsyncTask;
+use pocketmine\Server;
 use ZipArchive;
 
 class WorldZipBackupAsyncTask extends AsyncTask
@@ -31,7 +33,7 @@ class WorldZipBackupAsyncTask extends AsyncTask
         $this->worldPath = $worldPath;
         $this->backupPath = "";
 
-        WorldBackup::getInstance()->getLogger()->info("ワールドバックアップを作成しています...");
+        WorldBackup::getInstance()->getLogger()->info(LanguageManager::getInstance()->getLanguage(Server::getInstance()->getLanguage()->getLang())->translateString("system.worldbackup.zip.start"));
     }
 
     public function onRun(): void
@@ -39,7 +41,7 @@ class WorldZipBackupAsyncTask extends AsyncTask
         $zip = new ZipArchive();
         $this->backupPath = "{$this->backupFolderPath}backups/" . date("Y-m-d-H-i-s") . ".worldbackup.zip";
         if ($zip->open($this->backupPath, ZipArchive::CREATE) === true) {
-            $this->zipSub($zip, $this->worldPath);
+            $this->copy($zip, $this->worldPath);
             if (!@$zip->close()) {
                 $this->setResult(false);
             } else {
@@ -53,13 +55,14 @@ class WorldZipBackupAsyncTask extends AsyncTask
     public function onCompletion(): void
     {
         if (!$this->getResult()) {
-            WorldBackup::getInstance()->getLogger()->error("ワールドバックアップの作成に失敗しました");
+            WorldBackup::getInstance()->getLogger()->error(LanguageManager::getInstance()->getLanguage(Server::getInstance()->getLanguage()->getLang())->translateString("system.worldbackup.zip.failed"));
         } else {
-            WorldBackup::getInstance()->getLogger()->info("ワールドバックアップ(ZIP)を作成しました、作成先: $this->backupPath");
+            WorldBackup::getInstance()->getLogger()->info(LanguageManager::getInstance()->getLanguage(Server::getInstance()->getLanguage()->getLang())->translateString("system.worldbackup.zip.success"));
+            WorldBackup::getInstance()->getLogger()->info(LanguageManager::getInstance()->getLanguage(Server::getInstance()->getLanguage()->getLang())->translateString("system.worldbackup.zip.path", [$this->backupPath]));
         }
     }
 
-    private function zipSub(ZipArchive $zip, string $path, string $parentPath = '')
+    private function copy(ZipArchive $zip, string $path, string $parentPath = '')
     {
         $dir = opendir($path);
         while (($entry = readdir($dir)) !== false) {
@@ -70,7 +73,7 @@ class WorldZipBackupAsyncTask extends AsyncTask
                 if (is_file($fullpath)) {
                     $zip->addFile($fullpath, "$localPath");
                 } elseif (is_dir($fullpath)) {
-                    $this->zipSub($zip, $fullpath, $localPath . '/');
+                    $this->copy($zip, $fullpath, $localPath . '/');
                 }
             }
         }

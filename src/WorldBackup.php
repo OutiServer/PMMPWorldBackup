@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace outiserver\worldbackup;
 
-use outiserver\worldbackup\commands\WorldCopyBackupCommand;
-use outiserver\worldbackup\commands\WorldZipBackupCommand;
+use JackMD\ConfigUpdater\ConfigUpdater;
+use outiserver\worldbackup\commands\WorldBackupCommand;
+use outiserver\worldbackup\language\LanguageManager;
 use outiserver\worldbackup\tasks\WorldCopyBackupAsyncTask;
 use outiserver\worldbackup\tasks\WorldZipBackupAsyncTask;
 use pocketmine\plugin\PluginBase;
@@ -17,9 +18,9 @@ class WorldBackup extends PluginBase
 {
     use SingletonTrait;
 
-    public const CONFIG_VERSION = "1.0.0";
-
     private Config $config;
+
+    private LanguageManager $languageManager;
 
     protected function onLoad(): void
     {
@@ -28,26 +29,21 @@ class WorldBackup extends PluginBase
 
     protected function onEnable(): void
     {
-        if (@file_exists("{$this->getDataFolder()}config.yml")) {
-            $config = new Config("{$this->getDataFolder()}config.yml", Config::YAML);
-            if ($config->get("version") !== self::CONFIG_VERSION) {
-                rename("{$this->getDataFolder()}config.yml", "{$this->getDataFolder()}config.yml.{$config->get("version")}");
-                $this->getLogger()->warning("config.yml バージョンが違うため、上書きしました");
-                $this->getLogger()->warning("前バージョンのconfig.ymlは{$this->getDataFolder()}config.yml.{$config->get("version")}にあります");
-            }
-        }
+        $this->saveResource("config.yml");
+        $this->config = new Config("{$this->getDataFolder()}config.yml", Config::YAML);
+
+        ConfigUpdater::checkUpdate($this, $this->config, "version", 1);
+
+        $this->languageManager = new LanguageManager("{$this->getFile()}resources/lang");
 
         if (!file_exists("{$this->getDataFolder()}backups/")) {
             mkdir("{$this->getDataFolder()}backups/");
         }
 
-        $this->saveResource("config.yml");
-        $this->config = new Config("{$this->getDataFolder()}config.yml", Config::YAML);
-
         if ($this->config->get("mode") !== "zip" and $this->config->get("mode") !== "copy") {
             $this->config->set("mode", "copy");
             $this->config->save();
-            $this->getLogger()->warning("Configのmodeの設定値が不正だったため、上書きしました");
+            $this->getLogger()->warning($this->languageManager->getLanguage($this->getServer()->getLanguage()->getLang())->translateString("system.config_mode_error"));
         }
 
         $this->getScheduler()->scheduleRepeatingTask(new ClosureTask(
@@ -64,13 +60,20 @@ class WorldBackup extends PluginBase
             $this->getConfig()->get("interval", 60) * 60 * 20);
 
         $this->getServer()->getCommandMap()->registerAll($this->getName(), [
-            new WorldZipBackupCommand($this, "worldzipbackup", "ワールドバックアップをZIP形式で作成する", "/worldzipbackup", []),
-            new WorldCopyBackupCommand($this, "worldcopybackup", "ワールドバックアップをコピー形式で作成する", "/worldcopybackup", []),
+            new WorldBackupCommand($this, "worldbackup", "Create World Backup", "/worldbackup [zip|copy]", []),
         ]);
     }
 
     public function getConfig(): Config
     {
         return $this->config;
+    }
+
+    /**
+     * @return LanguageManager
+     */
+    public function getLanguageManager(): LanguageManager
+    {
+        return $this->languageManager;
     }
 }
