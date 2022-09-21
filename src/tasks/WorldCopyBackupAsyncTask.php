@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace outiserver\worldbackup\tasks;
 
+use outiserver\worldbackup\language\LanguageManager;
 use outiserver\worldbackup\WorldBackup;
 use pocketmine\scheduler\AsyncTask;
+use pocketmine\Server;
 
 class WorldCopyBackupAsyncTask extends AsyncTask
 {
@@ -31,7 +33,7 @@ class WorldCopyBackupAsyncTask extends AsyncTask
         $this->worldPath = $worldPath;
         $this->backupPath = "";
 
-        WorldBackup::getInstance()->getLogger()->info("ワールドバックアップを作成しています...");
+        WorldBackup::getInstance()->getLogger()->info(LanguageManager::getInstance()->getLanguage(Server::getInstance()->getLanguage()->getLang())->translateString("system.worldbackup.copy.start"));
     }
 
     public function onRun(): void
@@ -43,8 +45,8 @@ class WorldCopyBackupAsyncTask extends AsyncTask
 
     public function onCompletion(): void
     {
-        WorldBackup::getInstance()->getLogger()->info("ワールドバックアップ(コピー)は正常に作成されたはずです");
-        WorldBackup::getInstance()->getLogger()->info("コピー先: $this->backupPath");
+        WorldBackup::getInstance()->getLogger()->info(LanguageManager::getInstance()->getLanguage(Server::getInstance()->getLanguage()->getLang())->translateString("system.worldbackup.copy.success"));
+        WorldBackup::getInstance()->getLogger()->info(LanguageManager::getInstance()->getLanguage(Server::getInstance()->getLanguage()->getLang())->translateString("system.worldbackup.copy.path", [$this->backupPath]));
     }
 
     private function copy($dir, $new_dir)

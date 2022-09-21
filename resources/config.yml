@@ -1,5 +1,5 @@
 # Config Version (上書きしないでください)
-version: 1.0.0
+version: 1
 
 # バックアップする間隔(分)
 interval: 60
